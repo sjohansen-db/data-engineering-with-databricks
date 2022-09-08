@@ -317,6 +317,10 @@ RESTORE TABLE students TO VERSION AS OF 8
 
 -- COMMAND ----------
 
+DESCRIBE HISTORY students
+
+-- COMMAND ----------
+
 -- MAGIC %md
 -- MAGIC 
 -- MAGIC 
