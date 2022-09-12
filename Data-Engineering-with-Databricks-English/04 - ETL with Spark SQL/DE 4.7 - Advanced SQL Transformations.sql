@@ -183,8 +183,8 @@ FROM events
 SELECT user_id,
   collect_set(event_name) AS event_history,
   array_distinct(flatten(collect_set(items.item_id))) AS cart_history
-FROM events
-GROUP BY user_id
+  FROM events
+ GROUP BY user_id
 
 -- COMMAND ----------
 
@@ -206,6 +206,8 @@ FROM (
   FROM sales) a
 INNER JOIN item_lookup b
 ON a.item.item_id = b.item_id;
+
+-- COMMAND ----------
 
 SELECT * FROM sales_enriched
 

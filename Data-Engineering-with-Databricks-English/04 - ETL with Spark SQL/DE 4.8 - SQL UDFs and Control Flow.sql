@@ -177,6 +177,10 @@ SELECT foods_i_like(food) FROM foods
 
 -- COMMAND ----------
 
+EXPLAIN EXTENDED SELECT foods_i_like(food) FROM foods
+
+-- COMMAND ----------
+
 -- MAGIC %md
 -- MAGIC 
 -- MAGIC 
