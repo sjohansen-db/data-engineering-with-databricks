@@ -134,6 +134,10 @@ SELECT * FROM parquet.`${da.paths.datasets}/raw/sales-30m`
 
 -- COMMAND ----------
 
+DESCRIBE HISTORY sales
+
+-- COMMAND ----------
+
 -- MAGIC %md
 -- MAGIC 
 -- MAGIC 

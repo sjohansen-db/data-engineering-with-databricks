@@ -68,8 +68,19 @@
 
 -- COMMAND ----------
 
--- TODO
-<FILL_IN> ${da.paths.datasets}/raw/events-kafka/
+CREATE OR REPLACE TABLE events_json
+SELECT CAST(key AS BINARY)    AS key
+     , offset
+     , CAST(partition AS INT) AS partition
+     , timestamp
+     , topic
+     , CAST(value AS BINARY)  AS value
+  FROM json.`${da.paths.datasets}/raw/events-kafka/`
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC spark.read.json('dbfs:/user/steve.johansen@databricks.com/dbacademy/dewd/source/eltwss/raw/events-kafka')
 
 -- COMMAND ----------
 
@@ -99,8 +110,10 @@
 
 -- COMMAND ----------
 
--- TODO
-<FILL_IN>
+CREATE OR REPLACE TABLE events_raw
+SELECT *
+  FROM events_json
+ LIMIT 0
 
 -- COMMAND ----------
 
@@ -128,8 +141,9 @@
 
 -- COMMAND ----------
 
--- TODO
-<FILL_IN>
+INSERT INTO events_raw
+SELECT *
+  FROM events_json
 
 -- COMMAND ----------
 
@@ -140,8 +154,8 @@
 
 -- COMMAND ----------
 
--- TODO
-<FILL_IN>
+SELECT *
+  FROM events_raw
 
 -- COMMAND ----------
 
@@ -169,8 +183,9 @@
 
 -- COMMAND ----------
 
--- TODO
-<FILL_IN> ${da.paths.datasets}/raw/item-lookup
+CREATE OR REPLACE TABLE item_lookup
+SELECT *
+  FROM parquet.`${da.paths.datasets}/raw/item-lookup`
 
 -- COMMAND ----------
 
