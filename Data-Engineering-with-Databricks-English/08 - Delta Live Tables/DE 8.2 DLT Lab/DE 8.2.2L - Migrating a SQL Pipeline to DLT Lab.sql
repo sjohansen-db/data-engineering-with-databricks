@@ -33,10 +33,12 @@
 
 -- COMMAND ----------
 
--- TODO
-CREATE <FILL-IN>
-AS SELECT <FILL-IN>
-  FROM cloud_files("${source}", "json", map("cloudFiles.schemaHints", "time DOUBLE"))
+CREATE OR REFRESH STREAMING LIVE TABLE recordings_bronze
+COMMENT "Heart rate recordings from medical devices"
+     AS SELECT *
+             , CURRENT_TIMESTAMP() AS receipt_time
+             , INPUT_FILE_NAME()   AS source_file
+          FROM cloud_files("${source}", "json", map("cloudFiles.schemaHints", "time DOUBLE"))
 
 -- COMMAND ----------
 
@@ -58,10 +60,16 @@ AS SELECT <FILL-IN>
 
 -- COMMAND ----------
 
--- TODO
-CREATE <FILL-IN> pii
-AS SELECT *
-  FROM cloud_files("/mnt/training/healthcare/patient", "csv", map(<FILL-IN>))
+CREATE OR REFRESH STREAMING LIVE TABLE pii
+COMMENT "static table of patient information"
+     AS SELECT *
+             , CURRENT_TIMESTAMP() AS receipt_time
+             , INPUT_FILE_NAME()   AS source_file
+          FROM cloud_files(
+               "/mnt/training/healthcare/patient"
+             , "csv"
+             , map("header", "true", "cloudFiles.inferColumnTypes", "true")
+             )
 
 -- COMMAND ----------
 
@@ -86,16 +94,18 @@ AS SELECT *
 
 -- COMMAND ----------
 
--- TODO
 CREATE OR REFRESH STREAMING LIVE TABLE recordings_enriched
-  (<FILL-IN add a constraint to drop records when heartrate ! > 0>)
-AS SELECT 
-  CAST(<FILL-IN>) device_id, 
-  <FILL-IN mrn>, 
-  <FILL-IN heartrate>, 
-  CAST(FROM_UNIXTIME(DOUBLE(time), 'yyyy-MM-dd HH:mm:ss') AS TIMESTAMP) time 
-  FROM STREAM(live.recordings_bronze)
-  <FILL-IN specify source and perform inner join with pii on mrn>
+  (CONSTRAINT valid_heartrate EXPECT (heartrate <= 0) ON VIOLATION DROP ROW)
+COMMENT "Heart rate recordings from medical devices enriched with patient data"
+AS SELECT CAST(rb.device_id AS INTEGER) AS device_id, 
+          CAST(rb.mrn AS LONG)          AS mrn, 
+          CAST(rb.heartrate AS DOUBLE)  AS heartrate, 
+          CAST(FROM_UNIXTIME(DOUBLE(rb.time), 'yyyy-MM-dd HH:mm:ss') AS TIMESTAMP) AS time,
+          pii.name                      AS name
+  FROM STREAM(live.recordings_bronze) rb
+ INNER JOIN STREAM(live.pii) pii
+    ON rb.mrn = pii.mrn
+  
 
 -- COMMAND ----------
 
@@ -115,10 +125,12 @@ AS SELECT
 
 -- COMMAND ----------
 
--- TODO
-CREATE <FILL-IN> daily_patient_avg
-  COMMENT <FILL-IN insert comment here>
-AS SELECT <FILL-IN>
+CREATE OR REFRESH LIVE TABLE daily_patient_avg
+  COMMENT "Aggregated metrics by patient by date"
+AS SELECT mrn
+        , name
+        , TO_DATE(time) AS date
+     FROM live.recordings_enriched
 
 -- COMMAND ----------
 

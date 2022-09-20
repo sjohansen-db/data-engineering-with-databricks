@@ -52,6 +52,11 @@ DA.data_factory.load()
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC SELECT * FROM ${da.db_name}.daily_patient_avg
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC 
 # MAGIC 
